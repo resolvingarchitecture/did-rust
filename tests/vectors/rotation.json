@@ -1,0 +1,2006 @@
+{
+  "$note": "Acceptance-rule test vectors for guardian social recovery / key rotation. See README.md. A conforming verifier MUST reach the stated `accept` verdict for every case. Reference implementation of the rule: acceptance.py.",
+  "license": "CC0-1.0",
+  "license_note": "Public domain. Copy verbatim into any implementation; ship with a NIP. Full text: vectors/LICENSE.",
+  "generated": "2026-09-06",
+  "generated_with": "nostr-tools 2.23.9 / @noble/curves 2.0.1. Every event verifies as a Nostr event (cross-checked with nostr-sdk 0.44.2); the acceptance verdicts are cross-checked by acceptance.py, an independent Python implementation of the rule.",
+  "cooldown_seconds": 604800,
+  "prev_sig_definition": "BIP-340 Schnorr signature by the OLD key over the 32 raw bytes of the NEW x-only pubkey.",
+  "acceptance_rule": [
+    "1. a valid Guardian Set (kind 30101) signed by `old` exists, with threshold M and guardian set G",
+    "2. >= M distinct members of G published valid kind 30102 events with d == old and an identical `new`",
+    "3. each counted endorsement is signed by that guardian own key (pubkey in G)",
+    "4. a kind 30103 Rotation Claim signed by `new` exists with d == old; OR the claim carries a valid `prev-sig` (self-authorized, guardians not required)",
+    "5. the Guardian Set relied on is the most recent one whose created_at <= claim.created_at AND created_at + cooldown_seconds <= claim.created_at"
+  ],
+  "keys": {
+    "OLD": {
+      "role": "identity being rotated from",
+      "sec": "1000000000000000000000000000000000000000000000000000000000000001",
+      "pub": "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+    },
+    "NEW": {
+      "role": "intended successor",
+      "sec": "2000000000000000000000000000000000000000000000000000000000000002",
+      "pub": "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+    },
+    "MAL": {
+      "role": "attacker-controlled successor",
+      "sec": "ee0000000000000000000000000000000000000000000000000000000000000e",
+      "pub": "dcaeefe416df966026b5443a80cb7dd0e870d3fb1a6ad2bd7883ba8b1b2aa910"
+    },
+    "G1": {
+      "role": "guardian",
+      "sec": "a100000000000000000000000000000000000000000000000000000000000001",
+      "pub": "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34"
+    },
+    "G2": {
+      "role": "guardian",
+      "sec": "a200000000000000000000000000000000000000000000000000000000000002",
+      "pub": "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b"
+    },
+    "G3": {
+      "role": "guardian",
+      "sec": "a300000000000000000000000000000000000000000000000000000000000003",
+      "pub": "b7a1ea6cd925ebb30abdd525a3269fa0ea3477d8093d15c9b963cb004e2735d8"
+    },
+    "G4": {
+      "role": "a contact, not a guardian",
+      "sec": "a400000000000000000000000000000000000000000000000000000000000004",
+      "pub": "71d885b4e69678fdca16b611e671642a1aaed23d4c4578b426b54748827ad11f"
+    },
+    "ATK": {
+      "role": "attacker-controlled \"guardian\"",
+      "sec": "ff0000000000000000000000000000000000000000000000000000000000000f",
+      "pub": "06c845c0465b8d528f31c901a39d95c604c07ffe30333ebbd3fd19ba8fe57325"
+    }
+  },
+  "cases": [
+    {
+      "name": "happy-path-threshold-met",
+      "accept": true,
+      "about": "guardian set (thr 2) old enough; claim by NEW; 2 distinct guardians endorse NEW",
+      "events": [
+        {
+          "id": "23f6825b632c924afaa6e30843d90b22a69526f36b0fc4222b6a5394df4a5858",
+          "pubkey": "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746",
+          "created_at": 1700000000,
+          "kind": 30101,
+          "tags": [
+            [
+              "d",
+              "guardians"
+            ],
+            [
+              "p",
+              "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34"
+            ],
+            [
+              "p",
+              "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b"
+            ],
+            [
+              "p",
+              "b7a1ea6cd925ebb30abdd525a3269fa0ea3477d8093d15c9b963cb004e2735d8"
+            ],
+            [
+              "threshold",
+              "2"
+            ]
+          ],
+          "content": "",
+          "sig": "6e2afd7910119db905711d5898c2b1b27c492a4842e7df34061a34c03df9a3eb6639faae8a519f4fb86935918b5487da2457c35d6915ebc73c35bde8445185eb"
+        },
+        {
+          "id": "f14c5c77f6f5bd30922555dcd2cd449f12670bf9226ec52409c2439609f046d4",
+          "pubkey": "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153",
+          "created_at": 1702592000,
+          "kind": 30103,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "reason",
+              "lost"
+            ]
+          ],
+          "content": "",
+          "sig": "f534d55a0b765b2f3f5477d3b5d37d8ddf88fb311e2027bf8c68a15975853655e9c2dc55f3475bb09dd9125e495159e645118d4c5a403596685675bb47470a82"
+        },
+        {
+          "id": "45b1b2068cd9222ce4e758b48daa6974b40014a5b9cf89d94603f88c4474fd68",
+          "pubkey": "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34",
+          "created_at": 1702595600,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "2927a5dfe157605c85058692bbf16ef42a22379a43321f3f36b72fa5016aa85ffbd0b0499a1d898cef62f6126358e8774c81199171867e2ca8d09f315e26be42"
+        },
+        {
+          "id": "0b25a965be8a89b0b9054a8b68fc895c300a98706b7daf8eb27b9d683bf47860",
+          "pubkey": "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b",
+          "created_at": 1702599200,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "existing-channel"
+            ]
+          ],
+          "content": "",
+          "sig": "0824c0fe8db4e9012a5d2b2789fa423c9f79ef1698ba3458c82bf066fb709c67c7506497116752f5efdbcc8e3d7804e7c19eec6991589be85d80bcb14f6edfe8"
+        }
+      ]
+    },
+    {
+      "name": "threshold-exceeded",
+      "accept": true,
+      "about": "threshold 2, three guardians endorse — a minimum, not an exact count",
+      "events": [
+        {
+          "id": "23f6825b632c924afaa6e30843d90b22a69526f36b0fc4222b6a5394df4a5858",
+          "pubkey": "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746",
+          "created_at": 1700000000,
+          "kind": 30101,
+          "tags": [
+            [
+              "d",
+              "guardians"
+            ],
+            [
+              "p",
+              "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34"
+            ],
+            [
+              "p",
+              "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b"
+            ],
+            [
+              "p",
+              "b7a1ea6cd925ebb30abdd525a3269fa0ea3477d8093d15c9b963cb004e2735d8"
+            ],
+            [
+              "threshold",
+              "2"
+            ]
+          ],
+          "content": "",
+          "sig": "6e2afd7910119db905711d5898c2b1b27c492a4842e7df34061a34c03df9a3eb6639faae8a519f4fb86935918b5487da2457c35d6915ebc73c35bde8445185eb"
+        },
+        {
+          "id": "81430fc7431136cdd419f8e45b1df4e36fe2730a84993bd7460ad159e9a47d1e",
+          "pubkey": "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153",
+          "created_at": 1702592000,
+          "kind": 30103,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "reason",
+              "compromised"
+            ]
+          ],
+          "content": "",
+          "sig": "62ff90cc70682ac249a7bf980dc172e070add5cb1b133462e7dcaedb5d31c294370d4fc17f7001cf5ca2890a55fe0010e94ecef1cc1edda1edf14e908a15e9ad"
+        },
+        {
+          "id": "b611900c365c2c6f78e71367a02a1d1cccbc94a8cc3fc3d1c74d8f919d4cbeac",
+          "pubkey": "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34",
+          "created_at": 1702592100,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "12c369a9ba5c56c53a7cac148bd026bbd5f2c3549cfbc5a2e232b9486967127b8d083b83892eb31192e2d9da0a0e2b9b981116a666a44526d0033d11d4dfc898"
+        },
+        {
+          "id": "ecce37e39bcc8b02f8a822b5a66a3b3ba1ce6b84ebbbd6ce682b08738aabe59e",
+          "pubkey": "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b",
+          "created_at": 1702592200,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "3a296d559326a09b40f1d9b7d92b95dc343ce3e4af6d30314406b9de018c53926c31f2a18cada8459e14b2ed396a2e9096ead65a4ae57b061b1aa1e2b98c4fbb"
+        },
+        {
+          "id": "245a1fc2a106643ecadb16a297941b6fed3a480f4e864e39d6dd96eab7862904",
+          "pubkey": "b7a1ea6cd925ebb30abdd525a3269fa0ea3477d8093d15c9b963cb004e2735d8",
+          "created_at": 1702592300,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "qr"
+            ]
+          ],
+          "content": "",
+          "sig": "121f48e772df0da10a3f2857f3e6787cfb23309539584c24afb3843c76a9140e1ea08dd315b38afa7bbded0230e951e9a55917e6ab6e57e299a15745362af896"
+        }
+      ]
+    },
+    {
+      "name": "self-authorized-prev-sig",
+      "accept": true,
+      "about": "planned rotation: claim carries a valid prev-sig by OLD over NEW; no guardians needed",
+      "events": [
+        {
+          "id": "3cee9b90fc561bef8fdd7c9ee3318a20a8b049bd3587dac385ae4a882bf4689a",
+          "pubkey": "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153",
+          "created_at": 1700432000,
+          "kind": 30103,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "reason",
+              "planned"
+            ],
+            [
+              "prev-sig",
+              "135d7678685e66d1a83d3a91c0d5c85a000acc48bfb0698727175ead3caaf3b638647c4b68afe820261140a68589b28742c095ed4fbd1fcb3bb1d78b750c39e3"
+            ]
+          ],
+          "content": "",
+          "sig": "4967f4f92d73ce0a6bf73835789ae8f5f94812bf6e517f6fff4ea4ae6f571e13feb1642ba587fb20b52d5649efbcf60df94063ca13c8dbf9568be3933ce14339"
+        }
+      ]
+    },
+    {
+      "name": "self-authorized-overrides-missing-threshold",
+      "accept": true,
+      "about": "valid prev-sig short-circuits the guardian path even though only 1 of 2 guardians endorsed",
+      "events": [
+        {
+          "id": "23f6825b632c924afaa6e30843d90b22a69526f36b0fc4222b6a5394df4a5858",
+          "pubkey": "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746",
+          "created_at": 1700000000,
+          "kind": 30101,
+          "tags": [
+            [
+              "d",
+              "guardians"
+            ],
+            [
+              "p",
+              "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34"
+            ],
+            [
+              "p",
+              "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b"
+            ],
+            [
+              "p",
+              "b7a1ea6cd925ebb30abdd525a3269fa0ea3477d8093d15c9b963cb004e2735d8"
+            ],
+            [
+              "threshold",
+              "2"
+            ]
+          ],
+          "content": "",
+          "sig": "6e2afd7910119db905711d5898c2b1b27c492a4842e7df34061a34c03df9a3eb6639faae8a519f4fb86935918b5487da2457c35d6915ebc73c35bde8445185eb"
+        },
+        {
+          "id": "8c716d403316bff5de5f8a16c6f6236b151c71aa1739d56cb179278050827fca",
+          "pubkey": "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153",
+          "created_at": 1702592000,
+          "kind": 30103,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "reason",
+              "planned"
+            ],
+            [
+              "prev-sig",
+              "135d7678685e66d1a83d3a91c0d5c85a000acc48bfb0698727175ead3caaf3b638647c4b68afe820261140a68589b28742c095ed4fbd1fcb3bb1d78b750c39e3"
+            ]
+          ],
+          "content": "",
+          "sig": "9f8ab58b738ae89dcb6ddd2ea8d168542a14a0916f15a7f34a3f4e0b41af97678be4fbcdea0afad03096b7e4f03be9c4a490b7fb9293b89dda457c8b427adcc7"
+        },
+        {
+          "id": "b611900c365c2c6f78e71367a02a1d1cccbc94a8cc3fc3d1c74d8f919d4cbeac",
+          "pubkey": "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34",
+          "created_at": 1702592100,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "12c369a9ba5c56c53a7cac148bd026bbd5f2c3549cfbc5a2e232b9486967127b8d083b83892eb31192e2d9da0a0e2b9b981116a666a44526d0033d11d4dfc898"
+        }
+      ]
+    },
+    {
+      "name": "unrelated-events-ignored",
+      "accept": true,
+      "about": "a happy path with extra noise — a kind-1 note and an attestation from a non-guardian — still accepts",
+      "events": [
+        {
+          "id": "23f6825b632c924afaa6e30843d90b22a69526f36b0fc4222b6a5394df4a5858",
+          "pubkey": "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746",
+          "created_at": 1700000000,
+          "kind": 30101,
+          "tags": [
+            [
+              "d",
+              "guardians"
+            ],
+            [
+              "p",
+              "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34"
+            ],
+            [
+              "p",
+              "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b"
+            ],
+            [
+              "p",
+              "b7a1ea6cd925ebb30abdd525a3269fa0ea3477d8093d15c9b963cb004e2735d8"
+            ],
+            [
+              "threshold",
+              "2"
+            ]
+          ],
+          "content": "",
+          "sig": "6e2afd7910119db905711d5898c2b1b27c492a4842e7df34061a34c03df9a3eb6639faae8a519f4fb86935918b5487da2457c35d6915ebc73c35bde8445185eb"
+        },
+        {
+          "id": "4a6fc3804a8b156069f7015874c030f8c68aa018c9d160f0f28f2e16435eca1b",
+          "pubkey": "71d885b4e69678fdca16b611e671642a1aaed23d4c4578b426b54748827ad11f",
+          "created_at": 1702505600,
+          "kind": 1,
+          "tags": [],
+          "content": "unrelated note",
+          "sig": "062139a61f7b66515336c18113292294bfff1a5c50dcbe0ffcd419db62ae6e1a7f041a0515f082113bb4f3523b1288c72904fbcdc2a81d5f761875c9c891f013"
+        },
+        {
+          "id": "292fe188ee6bee88ed97e97603a1ec5a5a93528c42558f5bf180720ac6695895",
+          "pubkey": "71d885b4e69678fdca16b611e671642a1aaed23d4c4578b426b54748827ad11f",
+          "created_at": 1702592050,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "asserted"
+            ]
+          ],
+          "content": "",
+          "sig": "57f67c88e0b5c17e0068e0c812fb4207611d49793931ae89e651d96bcbb02333da915eb4639bd95dfb6dd1c1406e19dc9fb5a41d3096b8f2a33e8bb97c44dc08"
+        },
+        {
+          "id": "f14c5c77f6f5bd30922555dcd2cd449f12670bf9226ec52409c2439609f046d4",
+          "pubkey": "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153",
+          "created_at": 1702592000,
+          "kind": 30103,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "reason",
+              "lost"
+            ]
+          ],
+          "content": "",
+          "sig": "f534d55a0b765b2f3f5477d3b5d37d8ddf88fb311e2027bf8c68a15975853655e9c2dc55f3475bb09dd9125e495159e645118d4c5a403596685675bb47470a82"
+        },
+        {
+          "id": "b611900c365c2c6f78e71367a02a1d1cccbc94a8cc3fc3d1c74d8f919d4cbeac",
+          "pubkey": "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34",
+          "created_at": 1702592100,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "12c369a9ba5c56c53a7cac148bd026bbd5f2c3549cfbc5a2e232b9486967127b8d083b83892eb31192e2d9da0a0e2b9b981116a666a44526d0033d11d4dfc898"
+        },
+        {
+          "id": "ecce37e39bcc8b02f8a822b5a66a3b3ba1ce6b84ebbbd6ce682b08738aabe59e",
+          "pubkey": "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b",
+          "created_at": 1702592200,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "3a296d559326a09b40f1d9b7d92b95dc343ce3e4af6d30314406b9de018c53926c31f2a18cada8459e14b2ed396a2e9096ead65a4ae57b061b1aa1e2b98c4fbb"
+        }
+      ]
+    },
+    {
+      "name": "no-guardian-set",
+      "accept": false,
+      "fails_clause": 1,
+      "about": "claim + 2 endorsements but no kind 30101 anywhere",
+      "events": [
+        {
+          "id": "f14c5c77f6f5bd30922555dcd2cd449f12670bf9226ec52409c2439609f046d4",
+          "pubkey": "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153",
+          "created_at": 1702592000,
+          "kind": 30103,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "reason",
+              "lost"
+            ]
+          ],
+          "content": "",
+          "sig": "f534d55a0b765b2f3f5477d3b5d37d8ddf88fb311e2027bf8c68a15975853655e9c2dc55f3475bb09dd9125e495159e645118d4c5a403596685675bb47470a82"
+        },
+        {
+          "id": "b611900c365c2c6f78e71367a02a1d1cccbc94a8cc3fc3d1c74d8f919d4cbeac",
+          "pubkey": "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34",
+          "created_at": 1702592100,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "12c369a9ba5c56c53a7cac148bd026bbd5f2c3549cfbc5a2e232b9486967127b8d083b83892eb31192e2d9da0a0e2b9b981116a666a44526d0033d11d4dfc898"
+        },
+        {
+          "id": "ecce37e39bcc8b02f8a822b5a66a3b3ba1ce6b84ebbbd6ce682b08738aabe59e",
+          "pubkey": "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b",
+          "created_at": 1702592200,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "3a296d559326a09b40f1d9b7d92b95dc343ce3e4af6d30314406b9de018c53926c31f2a18cada8459e14b2ed396a2e9096ead65a4ae57b061b1aa1e2b98c4fbb"
+        }
+      ]
+    },
+    {
+      "name": "guardian-set-not-signed-by-old",
+      "accept": false,
+      "fails_clause": 1,
+      "about": "the kind 30101 is signed by G4, not by OLD — it does not bind OLD",
+      "events": [
+        {
+          "id": "22178cc0297a47b81f520f6b640d3f58f98346d499d4efc5d56f137414451631",
+          "pubkey": "71d885b4e69678fdca16b611e671642a1aaed23d4c4578b426b54748827ad11f",
+          "created_at": 1700000000,
+          "kind": 30101,
+          "tags": [
+            [
+              "d",
+              "guardians"
+            ],
+            [
+              "p",
+              "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34"
+            ],
+            [
+              "p",
+              "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b"
+            ],
+            [
+              "p",
+              "b7a1ea6cd925ebb30abdd525a3269fa0ea3477d8093d15c9b963cb004e2735d8"
+            ],
+            [
+              "threshold",
+              "2"
+            ]
+          ],
+          "content": "",
+          "sig": "1dd3a130d5f9a1a666a4f1c5e64e1e45e70ccc1fd2b2dcc3364e1d4deb19372fd4408a73faaab834ee577ab6dec70449428d758488826c53655c5625c33ed87e"
+        },
+        {
+          "id": "f14c5c77f6f5bd30922555dcd2cd449f12670bf9226ec52409c2439609f046d4",
+          "pubkey": "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153",
+          "created_at": 1702592000,
+          "kind": 30103,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "reason",
+              "lost"
+            ]
+          ],
+          "content": "",
+          "sig": "f534d55a0b765b2f3f5477d3b5d37d8ddf88fb311e2027bf8c68a15975853655e9c2dc55f3475bb09dd9125e495159e645118d4c5a403596685675bb47470a82"
+        },
+        {
+          "id": "b611900c365c2c6f78e71367a02a1d1cccbc94a8cc3fc3d1c74d8f919d4cbeac",
+          "pubkey": "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34",
+          "created_at": 1702592100,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "12c369a9ba5c56c53a7cac148bd026bbd5f2c3549cfbc5a2e232b9486967127b8d083b83892eb31192e2d9da0a0e2b9b981116a666a44526d0033d11d4dfc898"
+        },
+        {
+          "id": "ecce37e39bcc8b02f8a822b5a66a3b3ba1ce6b84ebbbd6ce682b08738aabe59e",
+          "pubkey": "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b",
+          "created_at": 1702592200,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "3a296d559326a09b40f1d9b7d92b95dc343ce3e4af6d30314406b9de018c53926c31f2a18cada8459e14b2ed396a2e9096ead65a4ae57b061b1aa1e2b98c4fbb"
+        }
+      ]
+    },
+    {
+      "name": "threshold-not-met",
+      "accept": false,
+      "fails_clause": 2,
+      "about": "guardian set threshold 3; only 2 guardians endorse",
+      "events": [
+        {
+          "id": "6786afb843b3481a716974b3b8dec95dc8fa0784f646b4b1dea61c55823c6d7d",
+          "pubkey": "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746",
+          "created_at": 1700000000,
+          "kind": 30101,
+          "tags": [
+            [
+              "d",
+              "guardians"
+            ],
+            [
+              "p",
+              "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34"
+            ],
+            [
+              "p",
+              "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b"
+            ],
+            [
+              "p",
+              "b7a1ea6cd925ebb30abdd525a3269fa0ea3477d8093d15c9b963cb004e2735d8"
+            ],
+            [
+              "threshold",
+              "3"
+            ]
+          ],
+          "content": "",
+          "sig": "665305896edb1d30c68db774391c60dfe7ed26a7d88bca82cfd3920a0c4c8bbe607fd147c85c1853cb23cac865e2176ce9cfe84d3a215c7b40696e2c28559052"
+        },
+        {
+          "id": "f14c5c77f6f5bd30922555dcd2cd449f12670bf9226ec52409c2439609f046d4",
+          "pubkey": "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153",
+          "created_at": 1702592000,
+          "kind": 30103,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "reason",
+              "lost"
+            ]
+          ],
+          "content": "",
+          "sig": "f534d55a0b765b2f3f5477d3b5d37d8ddf88fb311e2027bf8c68a15975853655e9c2dc55f3475bb09dd9125e495159e645118d4c5a403596685675bb47470a82"
+        },
+        {
+          "id": "b611900c365c2c6f78e71367a02a1d1cccbc94a8cc3fc3d1c74d8f919d4cbeac",
+          "pubkey": "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34",
+          "created_at": 1702592100,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "12c369a9ba5c56c53a7cac148bd026bbd5f2c3549cfbc5a2e232b9486967127b8d083b83892eb31192e2d9da0a0e2b9b981116a666a44526d0033d11d4dfc898"
+        },
+        {
+          "id": "ecce37e39bcc8b02f8a822b5a66a3b3ba1ce6b84ebbbd6ce682b08738aabe59e",
+          "pubkey": "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b",
+          "created_at": 1702592200,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "3a296d559326a09b40f1d9b7d92b95dc343ce3e4af6d30314406b9de018c53926c31f2a18cada8459e14b2ed396a2e9096ead65a4ae57b061b1aa1e2b98c4fbb"
+        }
+      ]
+    },
+    {
+      "name": "mismatched-new-keys",
+      "accept": false,
+      "fails_clause": 2,
+      "about": "two guardians endorse, but for different successor keys — no single new key reaches threshold",
+      "events": [
+        {
+          "id": "23f6825b632c924afaa6e30843d90b22a69526f36b0fc4222b6a5394df4a5858",
+          "pubkey": "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746",
+          "created_at": 1700000000,
+          "kind": 30101,
+          "tags": [
+            [
+              "d",
+              "guardians"
+            ],
+            [
+              "p",
+              "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34"
+            ],
+            [
+              "p",
+              "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b"
+            ],
+            [
+              "p",
+              "b7a1ea6cd925ebb30abdd525a3269fa0ea3477d8093d15c9b963cb004e2735d8"
+            ],
+            [
+              "threshold",
+              "2"
+            ]
+          ],
+          "content": "",
+          "sig": "6e2afd7910119db905711d5898c2b1b27c492a4842e7df34061a34c03df9a3eb6639faae8a519f4fb86935918b5487da2457c35d6915ebc73c35bde8445185eb"
+        },
+        {
+          "id": "f14c5c77f6f5bd30922555dcd2cd449f12670bf9226ec52409c2439609f046d4",
+          "pubkey": "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153",
+          "created_at": 1702592000,
+          "kind": 30103,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "reason",
+              "lost"
+            ]
+          ],
+          "content": "",
+          "sig": "f534d55a0b765b2f3f5477d3b5d37d8ddf88fb311e2027bf8c68a15975853655e9c2dc55f3475bb09dd9125e495159e645118d4c5a403596685675bb47470a82"
+        },
+        {
+          "id": "b611900c365c2c6f78e71367a02a1d1cccbc94a8cc3fc3d1c74d8f919d4cbeac",
+          "pubkey": "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34",
+          "created_at": 1702592100,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "12c369a9ba5c56c53a7cac148bd026bbd5f2c3549cfbc5a2e232b9486967127b8d083b83892eb31192e2d9da0a0e2b9b981116a666a44526d0033d11d4dfc898"
+        },
+        {
+          "id": "9409092437dd666d784b79fcda2bd04bd976eb0a57d1570380d232a882857498",
+          "pubkey": "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b",
+          "created_at": 1702592200,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "dcaeefe416df966026b5443a80cb7dd0e870d3fb1a6ad2bd7883ba8b1b2aa910"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "db95ee50a082365cfc0a73016684360ede61c7d7101d6dcc1e73abce1daa6fd6448b8e76a0835e98f46abe7866c0beb5806a6d3313d4e99bcccec131f20fb318"
+        }
+      ]
+    },
+    {
+      "name": "duplicate-guardian",
+      "accept": false,
+      "fails_clause": 2,
+      "about": "the same guardian (G1) publishes two endorsements to fake reaching threshold 2",
+      "events": [
+        {
+          "id": "23f6825b632c924afaa6e30843d90b22a69526f36b0fc4222b6a5394df4a5858",
+          "pubkey": "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746",
+          "created_at": 1700000000,
+          "kind": 30101,
+          "tags": [
+            [
+              "d",
+              "guardians"
+            ],
+            [
+              "p",
+              "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34"
+            ],
+            [
+              "p",
+              "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b"
+            ],
+            [
+              "p",
+              "b7a1ea6cd925ebb30abdd525a3269fa0ea3477d8093d15c9b963cb004e2735d8"
+            ],
+            [
+              "threshold",
+              "2"
+            ]
+          ],
+          "content": "",
+          "sig": "6e2afd7910119db905711d5898c2b1b27c492a4842e7df34061a34c03df9a3eb6639faae8a519f4fb86935918b5487da2457c35d6915ebc73c35bde8445185eb"
+        },
+        {
+          "id": "f14c5c77f6f5bd30922555dcd2cd449f12670bf9226ec52409c2439609f046d4",
+          "pubkey": "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153",
+          "created_at": 1702592000,
+          "kind": 30103,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "reason",
+              "lost"
+            ]
+          ],
+          "content": "",
+          "sig": "f534d55a0b765b2f3f5477d3b5d37d8ddf88fb311e2027bf8c68a15975853655e9c2dc55f3475bb09dd9125e495159e645118d4c5a403596685675bb47470a82"
+        },
+        {
+          "id": "b611900c365c2c6f78e71367a02a1d1cccbc94a8cc3fc3d1c74d8f919d4cbeac",
+          "pubkey": "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34",
+          "created_at": 1702592100,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "12c369a9ba5c56c53a7cac148bd026bbd5f2c3549cfbc5a2e232b9486967127b8d083b83892eb31192e2d9da0a0e2b9b981116a666a44526d0033d11d4dfc898"
+        },
+        {
+          "id": "f0095ed617caf07b1ecdc0e27011904d8c3cdd84b43b9b087376c2327d2e6cb6",
+          "pubkey": "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34",
+          "created_at": 1702592200,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "qr"
+            ]
+          ],
+          "content": "",
+          "sig": "505ceb27c57eee8b3d7d0dc2cbad64bd5661210900380ede99d4cdc261780ece4a8f59012e35711e116c36eb18dd2d59bb4d12ef7eea653313ae71817a6fed96"
+        }
+      ]
+    },
+    {
+      "name": "endorser-not-a-guardian",
+      "accept": false,
+      "fails_clause": 3,
+      "about": "guardian set is {G1,G2} thr 2; G1 endorses and G4 endorses, but G4 is not a guardian",
+      "events": [
+        {
+          "id": "0b12e83862456a14e892937962ea905b7882b30896212d2512c4728bdbd6eb45",
+          "pubkey": "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746",
+          "created_at": 1700000000,
+          "kind": 30101,
+          "tags": [
+            [
+              "d",
+              "guardians"
+            ],
+            [
+              "p",
+              "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34"
+            ],
+            [
+              "p",
+              "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b"
+            ],
+            [
+              "threshold",
+              "2"
+            ]
+          ],
+          "content": "",
+          "sig": "8eef641f5b58c21e88659a7a522e03b1e5bf8888a162141f29d189058cfc987916d2416d5e8607a16afbd76b77e05e39a7033950e393894981f36c32fdc7e801"
+        },
+        {
+          "id": "f14c5c77f6f5bd30922555dcd2cd449f12670bf9226ec52409c2439609f046d4",
+          "pubkey": "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153",
+          "created_at": 1702592000,
+          "kind": 30103,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "reason",
+              "lost"
+            ]
+          ],
+          "content": "",
+          "sig": "f534d55a0b765b2f3f5477d3b5d37d8ddf88fb311e2027bf8c68a15975853655e9c2dc55f3475bb09dd9125e495159e645118d4c5a403596685675bb47470a82"
+        },
+        {
+          "id": "b611900c365c2c6f78e71367a02a1d1cccbc94a8cc3fc3d1c74d8f919d4cbeac",
+          "pubkey": "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34",
+          "created_at": 1702592100,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "12c369a9ba5c56c53a7cac148bd026bbd5f2c3549cfbc5a2e232b9486967127b8d083b83892eb31192e2d9da0a0e2b9b981116a666a44526d0033d11d4dfc898"
+        },
+        {
+          "id": "d3977e57c2dd634b7512027b46a417fa7fc5543a3dbf7b8583a2c7e19866a21e",
+          "pubkey": "71d885b4e69678fdca16b611e671642a1aaed23d4c4578b426b54748827ad11f",
+          "created_at": 1702592200,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "22c89e0f9069a36c471a722a914ea20faaafb8f786e2e15c6bbc22c99dad4595e98f3fded72846c5a858c323863b9df6d8c86b72b3d0a8aa4fcdccdec19d0a29"
+        }
+      ]
+    },
+    {
+      "name": "no-rotation-claim",
+      "accept": false,
+      "fails_clause": 4,
+      "about": "guardian set + 2 endorsements but no kind 30103 claim",
+      "events": [
+        {
+          "id": "23f6825b632c924afaa6e30843d90b22a69526f36b0fc4222b6a5394df4a5858",
+          "pubkey": "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746",
+          "created_at": 1700000000,
+          "kind": 30101,
+          "tags": [
+            [
+              "d",
+              "guardians"
+            ],
+            [
+              "p",
+              "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34"
+            ],
+            [
+              "p",
+              "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b"
+            ],
+            [
+              "p",
+              "b7a1ea6cd925ebb30abdd525a3269fa0ea3477d8093d15c9b963cb004e2735d8"
+            ],
+            [
+              "threshold",
+              "2"
+            ]
+          ],
+          "content": "",
+          "sig": "6e2afd7910119db905711d5898c2b1b27c492a4842e7df34061a34c03df9a3eb6639faae8a519f4fb86935918b5487da2457c35d6915ebc73c35bde8445185eb"
+        },
+        {
+          "id": "b611900c365c2c6f78e71367a02a1d1cccbc94a8cc3fc3d1c74d8f919d4cbeac",
+          "pubkey": "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34",
+          "created_at": 1702592100,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "12c369a9ba5c56c53a7cac148bd026bbd5f2c3549cfbc5a2e232b9486967127b8d083b83892eb31192e2d9da0a0e2b9b981116a666a44526d0033d11d4dfc898"
+        },
+        {
+          "id": "ecce37e39bcc8b02f8a822b5a66a3b3ba1ce6b84ebbbd6ce682b08738aabe59e",
+          "pubkey": "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b",
+          "created_at": 1702592200,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "3a296d559326a09b40f1d9b7d92b95dc343ce3e4af6d30314406b9de018c53926c31f2a18cada8459e14b2ed396a2e9096ead65a4ae57b061b1aa1e2b98c4fbb"
+        }
+      ]
+    },
+    {
+      "name": "claim-signed-by-old-key",
+      "accept": false,
+      "fails_clause": 4,
+      "about": "the claim is signed by OLD, so it names OLD as its own successor; the endorsements are for NEW",
+      "events": [
+        {
+          "id": "23f6825b632c924afaa6e30843d90b22a69526f36b0fc4222b6a5394df4a5858",
+          "pubkey": "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746",
+          "created_at": 1700000000,
+          "kind": 30101,
+          "tags": [
+            [
+              "d",
+              "guardians"
+            ],
+            [
+              "p",
+              "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34"
+            ],
+            [
+              "p",
+              "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b"
+            ],
+            [
+              "p",
+              "b7a1ea6cd925ebb30abdd525a3269fa0ea3477d8093d15c9b963cb004e2735d8"
+            ],
+            [
+              "threshold",
+              "2"
+            ]
+          ],
+          "content": "",
+          "sig": "6e2afd7910119db905711d5898c2b1b27c492a4842e7df34061a34c03df9a3eb6639faae8a519f4fb86935918b5487da2457c35d6915ebc73c35bde8445185eb"
+        },
+        {
+          "id": "fdc353841dcd608d219101e3a5d4f672054c825177c89e24ca867689c1671b3b",
+          "pubkey": "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746",
+          "created_at": 1702592000,
+          "kind": 30103,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "reason",
+              "planned"
+            ]
+          ],
+          "content": "",
+          "sig": "41db0c9f0f7673df941a8da9aecef803157532b63d39ef2ba8ed06e85144c6f256748a09cecca2f30d6fc2e65f27536c04317bda7c265f72c6e3eb1665b2039b"
+        },
+        {
+          "id": "b611900c365c2c6f78e71367a02a1d1cccbc94a8cc3fc3d1c74d8f919d4cbeac",
+          "pubkey": "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34",
+          "created_at": 1702592100,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "12c369a9ba5c56c53a7cac148bd026bbd5f2c3549cfbc5a2e232b9486967127b8d083b83892eb31192e2d9da0a0e2b9b981116a666a44526d0033d11d4dfc898"
+        },
+        {
+          "id": "ecce37e39bcc8b02f8a822b5a66a3b3ba1ce6b84ebbbd6ce682b08738aabe59e",
+          "pubkey": "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b",
+          "created_at": 1702592200,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "3a296d559326a09b40f1d9b7d92b95dc343ce3e4af6d30314406b9de018c53926c31f2a18cada8459e14b2ed396a2e9096ead65a4ae57b061b1aa1e2b98c4fbb"
+        }
+      ]
+    },
+    {
+      "name": "guardian-set-inside-cooldown",
+      "accept": false,
+      "fails_clause": 5,
+      "about": "guardian set published only 2 days before the claim — inside the 7-day cool-down",
+      "events": [
+        {
+          "id": "5086c5dfe021cac2fafbb3d55b01cd6132886e4aafe1959fe219c827c311ae1c",
+          "pubkey": "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746",
+          "created_at": 1702419200,
+          "kind": 30101,
+          "tags": [
+            [
+              "d",
+              "guardians"
+            ],
+            [
+              "p",
+              "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34"
+            ],
+            [
+              "p",
+              "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b"
+            ],
+            [
+              "p",
+              "b7a1ea6cd925ebb30abdd525a3269fa0ea3477d8093d15c9b963cb004e2735d8"
+            ],
+            [
+              "threshold",
+              "2"
+            ]
+          ],
+          "content": "",
+          "sig": "a2dfd1424ebfebcfea3a700eeb7d7fc5c04d5cbe56a6598b804952ac6aa21cb502a17e2415c857a8d0d1cbee6c6eb6a5c887d53690c488dce1029f2e48f7577d"
+        },
+        {
+          "id": "f14c5c77f6f5bd30922555dcd2cd449f12670bf9226ec52409c2439609f046d4",
+          "pubkey": "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153",
+          "created_at": 1702592000,
+          "kind": 30103,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "reason",
+              "lost"
+            ]
+          ],
+          "content": "",
+          "sig": "f534d55a0b765b2f3f5477d3b5d37d8ddf88fb311e2027bf8c68a15975853655e9c2dc55f3475bb09dd9125e495159e645118d4c5a403596685675bb47470a82"
+        },
+        {
+          "id": "b611900c365c2c6f78e71367a02a1d1cccbc94a8cc3fc3d1c74d8f919d4cbeac",
+          "pubkey": "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34",
+          "created_at": 1702592100,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "12c369a9ba5c56c53a7cac148bd026bbd5f2c3549cfbc5a2e232b9486967127b8d083b83892eb31192e2d9da0a0e2b9b981116a666a44526d0033d11d4dfc898"
+        },
+        {
+          "id": "ecce37e39bcc8b02f8a822b5a66a3b3ba1ce6b84ebbbd6ce682b08738aabe59e",
+          "pubkey": "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b",
+          "created_at": 1702592200,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "3a296d559326a09b40f1d9b7d92b95dc343ce3e4af6d30314406b9de018c53926c31f2a18cada8459e14b2ed396a2e9096ead65a4ae57b061b1aa1e2b98c4fbb"
+        }
+      ]
+    },
+    {
+      "name": "compromised-key-self-approval",
+      "accept": false,
+      "fails_clause": 5,
+      "about": "attacker holds OLD: installs a fresh guardian set of attacker keys and self-approves within the cool-down",
+      "events": [
+        {
+          "id": "be52803beb9fc4aefc1bcaeceb16d7740d07b5254a2b65057a79fe3f41a0bb2f",
+          "pubkey": "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746",
+          "created_at": 1702505600,
+          "kind": 30101,
+          "tags": [
+            [
+              "d",
+              "guardians"
+            ],
+            [
+              "p",
+              "06c845c0465b8d528f31c901a39d95c604c07ffe30333ebbd3fd19ba8fe57325"
+            ],
+            [
+              "threshold",
+              "1"
+            ]
+          ],
+          "content": "",
+          "sig": "9b7edb12c16624198b7c98a9e7b4f507895538188eaef95d610a39b2ba4a5698f6a0aa43fcc08074f377dba2c838f6d2a2793d97e477af41cdcd039dbd7925ba"
+        },
+        {
+          "id": "e994bbff343147fe08c2df446fe7411aecdac3135f3f6b41bdd158eafa4623a1",
+          "pubkey": "06c845c0465b8d528f31c901a39d95c604c07ffe30333ebbd3fd19ba8fe57325",
+          "created_at": 1702509200,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "dcaeefe416df966026b5443a80cb7dd0e870d3fb1a6ad2bd7883ba8b1b2aa910"
+            ],
+            [
+              "method",
+              "asserted"
+            ]
+          ],
+          "content": "",
+          "sig": "d7f40f36b6d44c7552fbce4c751ef5b950954550dd4d88c45123a9f9a1e9e6c13a6e1da0af187d99d5ea44a00337639be17a4322b9cc597e734d081337a09da7"
+        },
+        {
+          "id": "1c98c83099c92f83abe23e738b869b119e6163f19be4e8302d6332e025202cce",
+          "pubkey": "dcaeefe416df966026b5443a80cb7dd0e870d3fb1a6ad2bd7883ba8b1b2aa910",
+          "created_at": 1702592000,
+          "kind": 30103,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "reason",
+              "compromised"
+            ]
+          ],
+          "content": "",
+          "sig": "df375d3aa25e17677b5e505834c0e45c89ba0c8ed22ce389c856c2b9918a12f0fd7fdb767d2d65c75450a13dd5c0c35311def496e6a0cba3fb78b1f0ed91db1d"
+        }
+      ]
+    },
+    {
+      "name": "superseded-guardian-set",
+      "accept": false,
+      "fails_clause": 5,
+      "about": "an old thr-1 set and a newer thr-3 set are both eligible; the newer one governs and only 1 guardian endorsed",
+      "events": [
+        {
+          "id": "fd5716252551516db8d33466828884a655bccb0a60f3c93d9cd2aeb6da4acb17",
+          "pubkey": "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746",
+          "created_at": 1700000000,
+          "kind": 30101,
+          "tags": [
+            [
+              "d",
+              "guardians"
+            ],
+            [
+              "p",
+              "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34"
+            ],
+            [
+              "threshold",
+              "1"
+            ]
+          ],
+          "content": "",
+          "sig": "91a0a8494f47775e32fc01e9b4232df3bbfba3b077f2adb7a6ab2dbadc9b7c94a3fe4f6041f924463f977433236e53b72da2459531ab716e7655e4cfa0ec4456"
+        },
+        {
+          "id": "4d65ea494dabcc32fd85204dc73f30887c0a72736498c672e61c126799e44dc3",
+          "pubkey": "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746",
+          "created_at": 1700864000,
+          "kind": 30101,
+          "tags": [
+            [
+              "d",
+              "guardians"
+            ],
+            [
+              "p",
+              "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34"
+            ],
+            [
+              "p",
+              "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b"
+            ],
+            [
+              "p",
+              "b7a1ea6cd925ebb30abdd525a3269fa0ea3477d8093d15c9b963cb004e2735d8"
+            ],
+            [
+              "threshold",
+              "3"
+            ]
+          ],
+          "content": "",
+          "sig": "8ab469e61548d4b6bea7aa55e4e55d491c11b9040779205f5555fd2db270ecd13ed1c4f00d43dc7930b1d77b5bc1e93aafe5119fd0c088f318840127ae45a117"
+        },
+        {
+          "id": "528bd89c502f9e38fab6a89001167f8b4a07d94a5e5a711a2bf59c82625f9822",
+          "pubkey": "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153",
+          "created_at": 1703456000,
+          "kind": 30103,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "reason",
+              "lost"
+            ]
+          ],
+          "content": "",
+          "sig": "537f085772ce5a5346bb2890b61c7aca50fae0eb2fde6bbe62b370ac3ef0b2e24901b524de04e2f3bb84ba29775b1d4849cdc30aa9d01a158a238dd185c865ea"
+        },
+        {
+          "id": "66577ee4b41909f41d108051cb9c6c9bca94314e6259328dcb339bf6a0578238",
+          "pubkey": "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34",
+          "created_at": 1703456100,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "9959fb49d3f7780c1db839915aa103dc3a8bc3552de1f6d4636bcd9984b03c691a8a078988525a845430d4aa50ec52be0fee1be50d64d1575293b40ba05ed998"
+        }
+      ]
+    },
+    {
+      "name": "guardian-set-after-claim",
+      "accept": false,
+      "fails_clause": 5,
+      "about": "the only guardian set was published after the claim — not in effect at the claim time",
+      "events": [
+        {
+          "id": "eb0cf13b2eb8277b9c630dc04b2084101583c1f670e698ebe51bcf3695d70297",
+          "pubkey": "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746",
+          "created_at": 1703456000,
+          "kind": 30101,
+          "tags": [
+            [
+              "d",
+              "guardians"
+            ],
+            [
+              "p",
+              "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34"
+            ],
+            [
+              "p",
+              "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b"
+            ],
+            [
+              "p",
+              "b7a1ea6cd925ebb30abdd525a3269fa0ea3477d8093d15c9b963cb004e2735d8"
+            ],
+            [
+              "threshold",
+              "2"
+            ]
+          ],
+          "content": "",
+          "sig": "d0071349851a50d1d18f4556bef9604782e00faf2152bb462aa7d5f6eb64ae6352ef0fa09b0c8ef142c16fc5b8ef5637440292a848e9e74efbd6bf83655c8c1f"
+        },
+        {
+          "id": "f14c5c77f6f5bd30922555dcd2cd449f12670bf9226ec52409c2439609f046d4",
+          "pubkey": "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153",
+          "created_at": 1702592000,
+          "kind": 30103,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "reason",
+              "lost"
+            ]
+          ],
+          "content": "",
+          "sig": "f534d55a0b765b2f3f5477d3b5d37d8ddf88fb311e2027bf8c68a15975853655e9c2dc55f3475bb09dd9125e495159e645118d4c5a403596685675bb47470a82"
+        },
+        {
+          "id": "66577ee4b41909f41d108051cb9c6c9bca94314e6259328dcb339bf6a0578238",
+          "pubkey": "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34",
+          "created_at": 1703456100,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "9959fb49d3f7780c1db839915aa103dc3a8bc3552de1f6d4636bcd9984b03c691a8a078988525a845430d4aa50ec52be0fee1be50d64d1575293b40ba05ed998"
+        },
+        {
+          "id": "c6d7bf654ffb9a63b0ebe91391bd31de6743608b409a2127a371f3fdf3b38850",
+          "pubkey": "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b",
+          "created_at": 1703456200,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "c50b06271b9683c67a1237299a61a8b18272fd14542eb7e7aab4eb4a2d1e8df26200bd233ca9fbd271f407e2efa4ea0922bd553979c097870ac10033cbff87ff"
+        }
+      ]
+    },
+    {
+      "name": "prev-sig-over-wrong-key",
+      "accept": false,
+      "fails_clause": 2,
+      "about": "prev-sig is OLD signing MAL, not NEW — ignored; guardian path then has only 1 of 2",
+      "events": [
+        {
+          "id": "23f6825b632c924afaa6e30843d90b22a69526f36b0fc4222b6a5394df4a5858",
+          "pubkey": "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746",
+          "created_at": 1700000000,
+          "kind": 30101,
+          "tags": [
+            [
+              "d",
+              "guardians"
+            ],
+            [
+              "p",
+              "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34"
+            ],
+            [
+              "p",
+              "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b"
+            ],
+            [
+              "p",
+              "b7a1ea6cd925ebb30abdd525a3269fa0ea3477d8093d15c9b963cb004e2735d8"
+            ],
+            [
+              "threshold",
+              "2"
+            ]
+          ],
+          "content": "",
+          "sig": "6e2afd7910119db905711d5898c2b1b27c492a4842e7df34061a34c03df9a3eb6639faae8a519f4fb86935918b5487da2457c35d6915ebc73c35bde8445185eb"
+        },
+        {
+          "id": "6bd1eac854255c7ac5152f05788a82659bef741b691533f28551373c6cabbc6d",
+          "pubkey": "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153",
+          "created_at": 1702592000,
+          "kind": 30103,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "reason",
+              "planned"
+            ],
+            [
+              "prev-sig",
+              "362d4f17bf80cdde3a46e13ede1ab2b6da64c6585b37a03d0614f029849d315cb46a1ed545eb5f4084fb26ca6542b349c79cd3f706ef689aee9734a487da8bf2"
+            ]
+          ],
+          "content": "",
+          "sig": "3126cedad9c09f00f9094e63e62497ea6ba57c935dc06d42462d13d7b1ddc4d511f2307fc0d9074118698a374f6d1568fbfef5396572a5ed1664c058aadbac3a"
+        },
+        {
+          "id": "b611900c365c2c6f78e71367a02a1d1cccbc94a8cc3fc3d1c74d8f919d4cbeac",
+          "pubkey": "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34",
+          "created_at": 1702592100,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "12c369a9ba5c56c53a7cac148bd026bbd5f2c3549cfbc5a2e232b9486967127b8d083b83892eb31192e2d9da0a0e2b9b981116a666a44526d0033d11d4dfc898"
+        }
+      ]
+    },
+    {
+      "name": "prev-sig-by-non-old",
+      "accept": false,
+      "fails_clause": 2,
+      "about": "prev-sig is a valid BIP-340 signature over NEW but by G1, not OLD — ignored; guardian path has only 1 of 2",
+      "events": [
+        {
+          "id": "23f6825b632c924afaa6e30843d90b22a69526f36b0fc4222b6a5394df4a5858",
+          "pubkey": "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746",
+          "created_at": 1700000000,
+          "kind": 30101,
+          "tags": [
+            [
+              "d",
+              "guardians"
+            ],
+            [
+              "p",
+              "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34"
+            ],
+            [
+              "p",
+              "e660ca8daa59b046f9eea8e2548f408053c9e7c6c5eb41bf0b8452fd9d74179b"
+            ],
+            [
+              "p",
+              "b7a1ea6cd925ebb30abdd525a3269fa0ea3477d8093d15c9b963cb004e2735d8"
+            ],
+            [
+              "threshold",
+              "2"
+            ]
+          ],
+          "content": "",
+          "sig": "6e2afd7910119db905711d5898c2b1b27c492a4842e7df34061a34c03df9a3eb6639faae8a519f4fb86935918b5487da2457c35d6915ebc73c35bde8445185eb"
+        },
+        {
+          "id": "8a22f5446f1a8f34323030f8dace99a6974660712686a8ad06f558b8e0964e50",
+          "pubkey": "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153",
+          "created_at": 1702592000,
+          "kind": 30103,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "reason",
+              "planned"
+            ],
+            [
+              "prev-sig",
+              "b1cda9be47bbfb26250da77906be53cceac89c096129bc1e187e53f4e585bec5b445cb749ac5d22c253b648380be82bf5d6975bb3d7b5b73b8187c21bc8487d6"
+            ]
+          ],
+          "content": "",
+          "sig": "2b34f3d230065db2b0ecc96f494217301c2596d9c944ffdf8ef89db4a992933dbdb8d80703197d101f8057472acdbdcd55d6a72325bcc532fb825eaca1999ff1"
+        },
+        {
+          "id": "b611900c365c2c6f78e71367a02a1d1cccbc94a8cc3fc3d1c74d8f919d4cbeac",
+          "pubkey": "6fea456860bd4975dea5abb794b75a83e5132a30f2484ce6fd0b98d8b2268c34",
+          "created_at": 1702592100,
+          "kind": 30102,
+          "tags": [
+            [
+              "d",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "p",
+              "347d79020cf8914031ed69aae2dd7f6e6ce7e036d2976e50c3e3c412165df746"
+            ],
+            [
+              "new",
+              "5e7c830fcdd0ca30dc875beae26e8c805ba633ae3451ec335550696fff072153"
+            ],
+            [
+              "method",
+              "in-person"
+            ]
+          ],
+          "content": "",
+          "sig": "12c369a9ba5c56c53a7cac148bd026bbd5f2c3549cfbc5a2e232b9486967127b8d083b83892eb31192e2d9da0a0e2b9b981116a666a44526d0033d11d4dfc898"
+        }
+      ]
+    }
+  ]
+}

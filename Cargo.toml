@@ -1,0 +1,25 @@
+[package]
+name = "did-nostr"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.74"
+description = "Reference implementation of Resolving Architecture's DID design: secp256k1/BIP-340 identities, Nostr-compatible signed records, attestations, and guardian-based key recovery."
+license = "CC0-1.0"
+authors = ["Resolving Architecture <brian@resolvingarchitecture.io>"]
+repository = "https://github.com/resolvingarchitecture/did-rust"
+keywords = ["did", "nostr", "identity", "bip340", "schnorr"]
+categories = ["cryptography", "authentication"]
+readme = "README.md"
+
+[dependencies]
+secp256k1 = { version = "0.30", features = ["std", "rand", "global-context"] }
+sha2 = "0.10"
+bech32 = "0.11"
+hex = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[dev-dependencies]
+# Ecosystem check: an unmodified third-party Nostr library MUST accept our events.
+# rust-nostr; pins secp256k1 0.30, the same primitive this crate builds on.
+nostr = { version = "0.45", default-features = false, features = ["std"] }

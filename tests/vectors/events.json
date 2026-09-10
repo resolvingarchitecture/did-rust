@@ -1,0 +1,811 @@
+{
+  "$note": "Interoperability test vectors for DID signed records. See README.md. Every implementation MUST pass these; authored once, shipped in every language port.",
+  "license": "CC0-1.0",
+  "license_note": "Public domain. Copy verbatim into any implementation; ship with a NIP. Full text: vectors/LICENSE.",
+  "generated": "2026-09-05",
+  "generated_with": "nostr-tools 2.23.9 / @noble/curves 2.0.1 (canonical serialization, sha256, BIP-340 Schnorr). Cross-checked with nostr-sdk 0.44.2 (rust-nostr) and an independent Python json+hashlib serializer.",
+  "signing_note": "Signatures use BIP-340 aux_rand = 32 zero bytes so the vectors are byte-for-byte reproducible. Verification does not depend on how a signature was produced.",
+  "canonical_serialization": {
+    "preimage": "[0,<pubkey>,<created_at>,<kind>,<tags>,<content>] as compact JSON (no whitespace anywhere), UTF-8 encoded",
+    "escapes": "In strings, escape ONLY: \" \\ \\n \\r \\t \\b \\f. Every other character, including all multi-byte UTF-8, is emitted literally. No \\/ ; no \\uXXXX.",
+    "id": "lowercase hex of sha256(preimage_bytes)",
+    "sig": "BIP-340 Schnorr over the 32 raw id bytes (not over the hex string)"
+  },
+  "keys": {
+    "A": {
+      "role": "attester / root identity",
+      "sec": "1100000000000000000000000000000000000000000000000000000000000001",
+      "pub": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494"
+    },
+    "B": {
+      "role": "subject",
+      "sec": "2200000000000000000000000000000000000000000000000000000000000002",
+      "pub": "7dd1c2c511c75d751e803542b4f34bf09b6a55d88d1faa7f33d18899520e30e8"
+    },
+    "G1": {
+      "role": "guardian 1",
+      "sec": "9100000000000000000000000000000000000000000000000000000000000001",
+      "pub": "4418c487e5082c656abc4e67edee8252c6933d5469634411ab185f59e7ae2c13"
+    },
+    "G2": {
+      "role": "guardian 2",
+      "sec": "9200000000000000000000000000000000000000000000000000000000000002",
+      "pub": "c7561ec9f037b92d407430f9285717985c0064ef020fbaec82d3b3a3d216c4e4"
+    },
+    "G3": {
+      "role": "guardian 3",
+      "sec": "9300000000000000000000000000000000000000000000000000000000000003",
+      "pub": "0b05ea0d3ed13dd16ced4a1036d55dd8b99bb2f3db712534ac8f1f3cfe0c7fb4"
+    },
+    "NEW": {
+      "role": "rotation target",
+      "sec": "ee000000000000000000000000000000000000000000000000000000000000ee",
+      "pub": "c8be2fa2322768d89d5ac1de119d11ec55270759202ca4aa97a4c16fdda3c6b1"
+    }
+  },
+  "verification_steps": [
+    "1. pubkey is 64 lowercase hex chars and a valid x-only point",
+    "2. recompute id from the canonical preimage; it MUST equal the stated id",
+    "3. verify the Schnorr signature over the 32 raw id bytes against pubkey",
+    "4. kind-specific validation (per-kind rules — see README.md)"
+  ],
+  "invalid_events_legend": {
+    "fails_step": "the verification step (1-4 of verification_steps) that this event violates",
+    "rejected_by": "'any' = any BIP-340 / NIP-01 verifier rejects it (bad point, id mismatch, bad signature); 'did' = a permissive generic Nostr verifier ACCEPTS it, but a DID-compliant verifier MUST reject it (lowercase-hex canonical form, or a kind-specific rule from the drafts)",
+    "kind_rule": "for step-4 cases, the specific per-kind rule that is violated"
+  },
+  "serialization": [
+    {
+      "name": "ascii-basic",
+      "about": "baseline: plain ASCII content, no tags",
+      "input": {
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000000,
+        "kind": 1,
+        "tags": [],
+        "content": "hello world"
+      },
+      "preimage": "[0,\"100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494\",1700000000,1,[],\"hello world\"]",
+      "preimage_utf8_bytes": 100,
+      "id": "6e4b064c70dba65e561a364e4fba179b3bfbf0ec42ae0805b5e94b66b6ce181c"
+    },
+    {
+      "name": "empty-tags-and-content",
+      "about": "empty tags array and empty content string",
+      "input": {
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000000,
+        "kind": 1,
+        "tags": [],
+        "content": ""
+      },
+      "preimage": "[0,\"100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494\",1700000000,1,[],\"\"]",
+      "preimage_utf8_bytes": 89,
+      "id": "8a87dbb29794a5a2281eb3d10f3030405cfc934590f694bc5537d0111c67d93e"
+    },
+    {
+      "name": "non-ascii-content",
+      "about": "multi-byte UTF-8 (Cyrillic, CJK, accents) emitted literally, not \\u-escaped",
+      "input": {
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000000,
+        "kind": 1,
+        "tags": [
+          [
+            "t",
+            "iñtërnâtiônàlizætiøn"
+          ]
+        ],
+        "content": "Здравствуй, 世界 — café"
+      },
+      "preimage": "[0,\"100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494\",1700000000,1,[[\"t\",\"iñtërnâtiônàlizætiøn\"]],\"Здравствуй, 世界 — café\"]",
+      "preimage_utf8_bytes": 162,
+      "id": "be4b05ee2938ad1406d94cada7761905f01549ee5889d729fe08a34058434dd6"
+    },
+    {
+      "name": "newlines-quotes-backslash",
+      "about": "the escapable set that appears in real text: \\n \\r \\t \\\" \\\\",
+      "input": {
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000000,
+        "kind": 1,
+        "tags": [],
+        "content": "line1\nline2\r\n\tindented \"quoted\" and a\\backslash"
+      },
+      "preimage": "[0,\"100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494\",1700000000,1,[],\"line1\\nline2\\r\\n\\tindented \\\"quoted\\\" and a\\\\backslash\"]",
+      "preimage_utf8_bytes": 143,
+      "id": "2997608d3ee89807905df7a16199104c74bc5fd15f8be9d177a78529e0b6b391"
+    },
+    {
+      "name": "backspace-formfeed",
+      "about": "the two rarely-seen named escapes \\b (U+0008) and \\f (U+000C)",
+      "input": {
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000000,
+        "kind": 1,
+        "tags": [],
+        "content": "a\bb\fc"
+      },
+      "preimage": "[0,\"100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494\",1700000000,1,[],\"a\\bb\\fc\"]",
+      "preimage_utf8_bytes": 96,
+      "id": "a1c8d024612fab5851f6921bc2bd8f1491f8f3015e7578c6baab4cdcdee12e52"
+    },
+    {
+      "name": "four-byte-codepoint",
+      "about": "astral-plane emoji (U+1F511, 4 UTF-8 bytes / JS surrogate pair) plus a ZWJ sequence",
+      "input": {
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000000,
+        "kind": 1,
+        "tags": [
+          [
+            "alt",
+            "key emoji 🔑"
+          ]
+        ],
+        "content": "rotate 🔑 now 🧑‍🤝‍🧑"
+      },
+      "preimage": "[0,\"100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494\",1700000000,1,[[\"alt\",\"key emoji 🔑\"]],\"rotate 🔑 now 🧑‍🤝‍🧑\"]",
+      "preimage_utf8_bytes": 147,
+      "id": "d74f7d44dd23eca3f7938146f0989633cae90712d153235d5bd20cf5566e41ac"
+    },
+    {
+      "name": "attestation-tags-varied-arity",
+      "about": "tags of arity 1, 2 and 3 in one event",
+      "input": {
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000000,
+        "kind": 30100,
+        "tags": [
+          [
+            "d",
+            "7dd1c2c511c75d751e803542b4f34bf09b6a55d88d1faa7f33d18899520e30e8"
+          ],
+          [
+            "p",
+            "7dd1c2c511c75d751e803542b4f34bf09b6a55d88d1faa7f33d18899520e30e8"
+          ],
+          [
+            "claim",
+            "name",
+            "alice"
+          ],
+          [
+            "-"
+          ]
+        ],
+        "content": ""
+      },
+      "preimage": "[0,\"100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494\",1700000000,30100,[[\"d\",\"7dd1c2c511c75d751e803542b4f34bf09b6a55d88d1faa7f33d18899520e30e8\"],[\"p\",\"7dd1c2c511c75d751e803542b4f34bf09b6a55d88d1faa7f33d18899520e30e8\"],[\"claim\",\"name\",\"alice\"],[\"-\"]],\"\"]",
+      "preimage_utf8_bytes": 269,
+      "id": "c92c69a01a9a2758da6398ae3f6d638d7299b82b04430dd0c7555f58e0b4d1de"
+    }
+  ],
+  "valid_events": [
+    {
+      "name": "text-note-non-ascii",
+      "about": "ordinary kind-1 note, non-ASCII + emoji content",
+      "event": {
+        "id": "31470b9d4c073b8ceb3d71b53bda37f870bf268ce22e275cc59e8061efd9817f",
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000000,
+        "kind": 1,
+        "tags": [
+          [
+            "t",
+            "did"
+          ]
+        ],
+        "content": "móving to a new 🔑",
+        "sig": "b5e4a12dcf05a71f689f1b50542b7d305725ecd90bca72f9cdf354a58e15ab1d0209738481b280292496844fa6f4c9d0ea65e7161773957b5b7cdb44e980739e"
+      }
+    },
+    {
+      "name": "identity-attestation",
+      "about": "kind 30100 — attester A vouches for subject B",
+      "event": {
+        "id": "0605288451b6bedcd447ea53211c264b2958c04958b0257067ff218546b45dcd",
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000000,
+        "kind": 30100,
+        "tags": [
+          [
+            "d",
+            "7dd1c2c511c75d751e803542b4f34bf09b6a55d88d1faa7f33d18899520e30e8"
+          ],
+          [
+            "p",
+            "7dd1c2c511c75d751e803542b4f34bf09b6a55d88d1faa7f33d18899520e30e8"
+          ],
+          [
+            "claim",
+            "name",
+            "alice"
+          ],
+          [
+            "claim",
+            "nip05",
+            "alice@example.com"
+          ],
+          [
+            "method",
+            "in-person"
+          ]
+        ],
+        "content": "",
+        "sig": "5384a3b347a678804352b857b07dd49b8534b9c152053038003f228cd66c1229a64fbf39a6dfdaaa4a546798f20fa2ba8da6ff8692bf0c4392811c0f09e41e74"
+      }
+    },
+    {
+      "name": "negative-attestation",
+      "about": "kind 30100 with a `not` claim — impersonation warning",
+      "event": {
+        "id": "29369d981314bf3b964f8416bbad0ca9958e17e865d4aa9b8c710ae733f50dd6",
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000000,
+        "kind": 30100,
+        "tags": [
+          [
+            "d",
+            "c8be2fa2322768d89d5ac1de119d11ec55270759202ca4aa97a4c16fdda3c6b1"
+          ],
+          [
+            "p",
+            "c8be2fa2322768d89d5ac1de119d11ec55270759202ca4aa97a4c16fdda3c6b1"
+          ],
+          [
+            "claim",
+            "not",
+            "alice"
+          ],
+          [
+            "method",
+            "existing-channel"
+          ]
+        ],
+        "content": "",
+        "sig": "fc96cb722d47df7b7854a55510678c41a85862a7144d62a1738b5ffa0791ac970f55614bebba36355a8c6672ff94e766b8e0c5f411c976e130a99461ebcf7bad"
+      }
+    },
+    {
+      "name": "guardian-set",
+      "about": "kind 30101 — root A designates 3 guardians, threshold 2",
+      "event": {
+        "id": "5ca59162f362afb23c9ef4dc4802758f94ee45b22ba99242eeb78c5965b6dd8b",
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000000,
+        "kind": 30101,
+        "tags": [
+          [
+            "d",
+            "guardians"
+          ],
+          [
+            "p",
+            "4418c487e5082c656abc4e67edee8252c6933d5469634411ab185f59e7ae2c13"
+          ],
+          [
+            "p",
+            "c7561ec9f037b92d407430f9285717985c0064ef020fbaec82d3b3a3d216c4e4"
+          ],
+          [
+            "p",
+            "0b05ea0d3ed13dd16ced4a1036d55dd8b99bb2f3db712534ac8f1f3cfe0c7fb4"
+          ],
+          [
+            "threshold",
+            "2"
+          ]
+        ],
+        "content": "",
+        "sig": "03c51d98eb952123749a981b6f6d3d04c333c49dc7eb000f5b864850ef206a04c735b413fc3d79831e42e74c99e0b178a0cc81d9b0d6d9613cf727afecb392d8"
+      }
+    },
+    {
+      "name": "rotation-claim",
+      "about": "kind 30103 — NEW key claims succession from A, reason lost",
+      "event": {
+        "id": "174e73c246cf0e5e9791ff738052ade36bd0e918b09a0229f050899470132f37",
+        "pubkey": "c8be2fa2322768d89d5ac1de119d11ec55270759202ca4aa97a4c16fdda3c6b1",
+        "created_at": 1700000100,
+        "kind": 30103,
+        "tags": [
+          [
+            "d",
+            "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494"
+          ],
+          [
+            "p",
+            "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494"
+          ],
+          [
+            "reason",
+            "lost"
+          ]
+        ],
+        "content": "",
+        "sig": "fdad1b89120e3f076102bc381eaca2fd7db85430a4c8a30a7a6acacc6ed236ee3f8d1dfbc53a909f17c5c963c11a40be317bf0b0975d368a996d6107ce0c0079"
+      }
+    },
+    {
+      "name": "rotation-attestation",
+      "about": "kind 30102 — guardian G1 endorses A -> NEW",
+      "event": {
+        "id": "5e6ba5ac82950d8ef25c20b9294c839a5fb809b80a024cb76d1d931bcaaab04b",
+        "pubkey": "4418c487e5082c656abc4e67edee8252c6933d5469634411ab185f59e7ae2c13",
+        "created_at": 1700000200,
+        "kind": 30102,
+        "tags": [
+          [
+            "d",
+            "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494"
+          ],
+          [
+            "p",
+            "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494"
+          ],
+          [
+            "new",
+            "c8be2fa2322768d89d5ac1de119d11ec55270759202ca4aa97a4c16fdda3c6b1"
+          ],
+          [
+            "method",
+            "existing-channel"
+          ]
+        ],
+        "content": "",
+        "sig": "db8359c05ed0c7f337cf135b66b670f569df8af3011f64f14a6e31bde6f4e884528dc87356a5c058dffa506d37e89781c4e209580652d8aae34c7b840d166a4c"
+      }
+    },
+    {
+      "name": "attestation-revocation",
+      "about": "kind 30100 replacement carrying `revoked` and no `claim` tags",
+      "event": {
+        "id": "539ad184829e47fc276a68574b9a3ab3d7727c7b00ed25bf5d85fa3e9e1eab0f",
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000300,
+        "kind": 30100,
+        "tags": [
+          [
+            "d",
+            "7dd1c2c511c75d751e803542b4f34bf09b6a55d88d1faa7f33d18899520e30e8"
+          ],
+          [
+            "p",
+            "7dd1c2c511c75d751e803542b4f34bf09b6a55d88d1faa7f33d18899520e30e8"
+          ],
+          [
+            "revoked",
+            "key rotated"
+          ]
+        ],
+        "content": "",
+        "sig": "8e3109d85dafcc8cad323d6fba0f069d0968c9d2cfaf203173dc2129d841d5fc012d837bfc7667b80a2459a5f5c94b5c5a122c8c73b505e05beb18b021ca1ba3"
+      }
+    }
+  ],
+  "invalid_events": [
+    {
+      "name": "step1-pubkey-uppercase",
+      "fails_step": 1,
+      "rejected_by": "did",
+      "about": "pubkey contains uppercase hex; MUST be lowercase",
+      "event": {
+        "id": "31470b9d4c073b8ceb3d71b53bda37f870bf268ce22e275cc59e8061efd9817f",
+        "pubkey": "100F6D8CBF94AFB6FC58E9C384B9B3A6516091373A83C869F4E24A9D2BB4A494",
+        "created_at": 1700000000,
+        "kind": 1,
+        "tags": [
+          [
+            "t",
+            "did"
+          ]
+        ],
+        "content": "móving to a new 🔑",
+        "sig": "b5e4a12dcf05a71f689f1b50542b7d305725ecd90bca72f9cdf354a58e15ab1d0209738481b280292496844fa6f4c9d0ea65e7161773957b5b7cdb44e980739e"
+      }
+    },
+    {
+      "name": "step1-pubkey-wrong-length",
+      "fails_step": 1,
+      "rejected_by": "any",
+      "about": "pubkey is 63 hex chars",
+      "event": {
+        "id": "31470b9d4c073b8ceb3d71b53bda37f870bf268ce22e275cc59e8061efd9817f",
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a49",
+        "created_at": 1700000000,
+        "kind": 1,
+        "tags": [
+          [
+            "t",
+            "did"
+          ]
+        ],
+        "content": "móving to a new 🔑",
+        "sig": "b5e4a12dcf05a71f689f1b50542b7d305725ecd90bca72f9cdf354a58e15ab1d0209738481b280292496844fa6f4c9d0ea65e7161773957b5b7cdb44e980739e"
+      }
+    },
+    {
+      "name": "step1-pubkey-not-on-curve",
+      "fails_step": 1,
+      "rejected_by": "any",
+      "about": "pubkey is 64 hex chars but exceeds the field prime, so it is not a valid x-coordinate",
+      "event": {
+        "id": "31470b9d4c073b8ceb3d71b53bda37f870bf268ce22e275cc59e8061efd9817f",
+        "pubkey": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "created_at": 1700000000,
+        "kind": 1,
+        "tags": [
+          [
+            "t",
+            "did"
+          ]
+        ],
+        "content": "móving to a new 🔑",
+        "sig": "b5e4a12dcf05a71f689f1b50542b7d305725ecd90bca72f9cdf354a58e15ab1d0209738481b280292496844fa6f4c9d0ea65e7161773957b5b7cdb44e980739e"
+      }
+    },
+    {
+      "name": "step2-content-tampered",
+      "fails_step": 2,
+      "rejected_by": "any",
+      "about": "content changed after signing; sha256 of the canonical preimage no longer equals id",
+      "event": {
+        "id": "31470b9d4c073b8ceb3d71b53bda37f870bf268ce22e275cc59e8061efd9817f",
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000000,
+        "kind": 1,
+        "tags": [
+          [
+            "t",
+            "did"
+          ]
+        ],
+        "content": "móving to a new 🔑 (edited)",
+        "sig": "b5e4a12dcf05a71f689f1b50542b7d305725ecd90bca72f9cdf354a58e15ab1d0209738481b280292496844fa6f4c9d0ea65e7161773957b5b7cdb44e980739e"
+      }
+    },
+    {
+      "name": "step2-tag-tampered",
+      "fails_step": 2,
+      "rejected_by": "any",
+      "about": "a claim value changed after signing",
+      "event": {
+        "id": "0605288451b6bedcd447ea53211c264b2958c04958b0257067ff218546b45dcd",
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000000,
+        "kind": 30100,
+        "tags": [
+          [
+            "d",
+            "7dd1c2c511c75d751e803542b4f34bf09b6a55d88d1faa7f33d18899520e30e8"
+          ],
+          [
+            "p",
+            "7dd1c2c511c75d751e803542b4f34bf09b6a55d88d1faa7f33d18899520e30e8"
+          ],
+          [
+            "claim",
+            "name",
+            "mallory"
+          ],
+          [
+            "claim",
+            "nip05",
+            "alice@example.com"
+          ],
+          [
+            "method",
+            "in-person"
+          ]
+        ],
+        "content": "",
+        "sig": "5384a3b347a678804352b857b07dd49b8534b9c152053038003f228cd66c1229a64fbf39a6dfdaaa4a546798f20fa2ba8da6ff8692bf0c4392811c0f09e41e74"
+      }
+    },
+    {
+      "name": "step2-created-at-tampered",
+      "fails_step": 2,
+      "rejected_by": "any",
+      "about": "created_at incremented after signing",
+      "event": {
+        "id": "31470b9d4c073b8ceb3d71b53bda37f870bf268ce22e275cc59e8061efd9817f",
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000001,
+        "kind": 1,
+        "tags": [
+          [
+            "t",
+            "did"
+          ]
+        ],
+        "content": "móving to a new 🔑",
+        "sig": "b5e4a12dcf05a71f689f1b50542b7d305725ecd90bca72f9cdf354a58e15ab1d0209738481b280292496844fa6f4c9d0ea65e7161773957b5b7cdb44e980739e"
+      }
+    },
+    {
+      "name": "step2-kind-tampered",
+      "fails_step": 2,
+      "rejected_by": "any",
+      "about": "kind changed after signing",
+      "event": {
+        "id": "31470b9d4c073b8ceb3d71b53bda37f870bf268ce22e275cc59e8061efd9817f",
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000000,
+        "kind": 2,
+        "tags": [
+          [
+            "t",
+            "did"
+          ]
+        ],
+        "content": "móving to a new 🔑",
+        "sig": "b5e4a12dcf05a71f689f1b50542b7d305725ecd90bca72f9cdf354a58e15ab1d0209738481b280292496844fa6f4c9d0ea65e7161773957b5b7cdb44e980739e"
+      }
+    },
+    {
+      "name": "step2-id-not-lowercase-hex",
+      "fails_step": 2,
+      "rejected_by": "did",
+      "about": "stated id is uppercase; the canonical id is lowercase hex",
+      "event": {
+        "id": "31470B9D4C073B8CEB3D71B53BDA37F870BF268CE22E275CC59E8061EFD9817F",
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000000,
+        "kind": 1,
+        "tags": [
+          [
+            "t",
+            "did"
+          ]
+        ],
+        "content": "móving to a new 🔑",
+        "sig": "b5e4a12dcf05a71f689f1b50542b7d305725ecd90bca72f9cdf354a58e15ab1d0209738481b280292496844fa6f4c9d0ea65e7161773957b5b7cdb44e980739e"
+      }
+    },
+    {
+      "name": "step3-sig-last-nibble-flipped",
+      "fails_step": 3,
+      "rejected_by": "any",
+      "about": "final nibble of sig flipped; id still matches content",
+      "event": {
+        "id": "31470b9d4c073b8ceb3d71b53bda37f870bf268ce22e275cc59e8061efd9817f",
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000000,
+        "kind": 1,
+        "tags": [
+          [
+            "t",
+            "did"
+          ]
+        ],
+        "content": "móving to a new 🔑",
+        "sig": "b5e4a12dcf05a71f689f1b50542b7d305725ecd90bca72f9cdf354a58e15ab1d0209738481b280292496844fa6f4c9d0ea65e7161773957b5b7cdb44e9807390"
+      }
+    },
+    {
+      "name": "step3-sig-from-other-key",
+      "fails_step": 3,
+      "rejected_by": "any",
+      "about": "well-formed signature by a different key (B) over this same id",
+      "event": {
+        "id": "31470b9d4c073b8ceb3d71b53bda37f870bf268ce22e275cc59e8061efd9817f",
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000000,
+        "kind": 1,
+        "tags": [
+          [
+            "t",
+            "did"
+          ]
+        ],
+        "content": "móving to a new 🔑",
+        "sig": "81465bc7a18110a36ebfe52b29cda437cebdf2e0d98216beb3c0cc26d44dd8b75e5d68e0f307991a1946425845acb5010e0c04ea494e38bf0d33c6a939b8c7f4"
+      }
+    },
+    {
+      "name": "step3-sig-all-zero",
+      "fails_step": 3,
+      "rejected_by": "any",
+      "about": "sig is 64 zero bytes",
+      "event": {
+        "id": "31470b9d4c073b8ceb3d71b53bda37f870bf268ce22e275cc59e8061efd9817f",
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000000,
+        "kind": 1,
+        "tags": [
+          [
+            "t",
+            "did"
+          ]
+        ],
+        "content": "móving to a new 🔑",
+        "sig": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+      }
+    },
+    {
+      "name": "step4-attestation-no-claim",
+      "fails_step": 4,
+      "rejected_by": "did",
+      "kind_rule": "kind 30100: kind 30100 requires >=1 `claim` tag",
+      "about": "kind 30100, correctly signed, but carries zero claim tags",
+      "event": {
+        "id": "61798f5414e265db1dd30d759005ae4e155b5b02b5aa32af194dcba8b1c1750e",
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000000,
+        "kind": 30100,
+        "tags": [
+          [
+            "d",
+            "7dd1c2c511c75d751e803542b4f34bf09b6a55d88d1faa7f33d18899520e30e8"
+          ],
+          [
+            "p",
+            "7dd1c2c511c75d751e803542b4f34bf09b6a55d88d1faa7f33d18899520e30e8"
+          ],
+          [
+            "method",
+            "qr"
+          ]
+        ],
+        "content": "",
+        "sig": "174d5a900095a1de1bbed65336edcbe0ec7b6b3f239c2516bf2d7a781602f49b036ca0718b41540c17d94035b7bb1b12dd778af47e5d7dea8af8a24067da51d3"
+      }
+    },
+    {
+      "name": "step4-attestation-missing-method",
+      "fails_step": 4,
+      "rejected_by": "did",
+      "kind_rule": "kind 30100: kind 30100 requires a `method` tag",
+      "about": "kind 30100, correctly signed, but has no method tag",
+      "event": {
+        "id": "4ba7de48c5e7a43d541e527a76e533c9f49565b8ffafbd6798d098643ebab8f3",
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000000,
+        "kind": 30100,
+        "tags": [
+          [
+            "d",
+            "7dd1c2c511c75d751e803542b4f34bf09b6a55d88d1faa7f33d18899520e30e8"
+          ],
+          [
+            "p",
+            "7dd1c2c511c75d751e803542b4f34bf09b6a55d88d1faa7f33d18899520e30e8"
+          ],
+          [
+            "claim",
+            "name",
+            "alice"
+          ]
+        ],
+        "content": "",
+        "sig": "778cabbd40f86516b8e38be0af4f73e76018c0ebccea65d9326f48ae173c0bb26e7b9f3cb554ee11f8a187e1cc1a645123194cc75af992ca254933d90ac82169"
+      }
+    },
+    {
+      "name": "step4-attestation-d-p-mismatch",
+      "fails_step": 4,
+      "rejected_by": "did",
+      "kind_rule": "kind 30100: `d` and `p` MUST both be the subject pubkey",
+      "about": "kind 30100 where the `d` tag and `p` tag name different pubkeys",
+      "event": {
+        "id": "73fb2f7f0a0ad8518af2885f868f548bc90bc268b1b3e2256acdcd5d6a713901",
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000000,
+        "kind": 30100,
+        "tags": [
+          [
+            "d",
+            "7dd1c2c511c75d751e803542b4f34bf09b6a55d88d1faa7f33d18899520e30e8"
+          ],
+          [
+            "p",
+            "c8be2fa2322768d89d5ac1de119d11ec55270759202ca4aa97a4c16fdda3c6b1"
+          ],
+          [
+            "claim",
+            "name",
+            "alice"
+          ],
+          [
+            "method",
+            "qr"
+          ]
+        ],
+        "content": "",
+        "sig": "72478515eec63cefc79788f399ed5fcaaf98edf40e4711f2e9a8f7e1676765d0e4a7036ee26fdf7cd7e69cf0e7e6f8794ad1dcef46cefdad57b7aacccbcff463"
+      }
+    },
+    {
+      "name": "step4-guardianset-threshold-exceeds-n",
+      "fails_step": 4,
+      "rejected_by": "did",
+      "kind_rule": "rotation: kind 30101 requires 1 <= M <= N",
+      "about": "kind 30101 with 2 guardians but threshold 3",
+      "event": {
+        "id": "c59aafcb6e249c345789a17cf9d051fc949c71987fdb71c51f858641cb33c32b",
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000000,
+        "kind": 30101,
+        "tags": [
+          [
+            "d",
+            "guardians"
+          ],
+          [
+            "p",
+            "4418c487e5082c656abc4e67edee8252c6933d5469634411ab185f59e7ae2c13"
+          ],
+          [
+            "p",
+            "c7561ec9f037b92d407430f9285717985c0064ef020fbaec82d3b3a3d216c4e4"
+          ],
+          [
+            "threshold",
+            "3"
+          ]
+        ],
+        "content": "",
+        "sig": "b0f7517921ae7c8b38c41c361ee619f3f835026f4964be77a4938d0552b596385fbbe648c1173a10afac2a7151c76593587cbcb4a7dac48760838b27073196c3"
+      }
+    },
+    {
+      "name": "step4-guardianset-threshold-zero",
+      "fails_step": 4,
+      "rejected_by": "did",
+      "kind_rule": "rotation: kind 30101 requires M >= 1",
+      "about": "kind 30101 with threshold 0",
+      "event": {
+        "id": "aff211fd3b0e9b7361129c8b13932cbcb31ea5213369ce47e5deca1fe3d24dfc",
+        "pubkey": "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494",
+        "created_at": 1700000000,
+        "kind": 30101,
+        "tags": [
+          [
+            "d",
+            "guardians"
+          ],
+          [
+            "p",
+            "4418c487e5082c656abc4e67edee8252c6933d5469634411ab185f59e7ae2c13"
+          ],
+          [
+            "threshold",
+            "0"
+          ]
+        ],
+        "content": "",
+        "sig": "39496ff4098395f43d6f756d56cc7dd456d947ffa972ab69f177c03329d4490798dac37f8097c261e548ede64f2996d145ce70f452f8e5a1f11d6860ec1d6c9a"
+      }
+    },
+    {
+      "name": "step4-rotation-claim-bad-reason",
+      "fails_step": 4,
+      "rejected_by": "did",
+      "kind_rule": "rotation: kind 30103 `reason` MUST be lost|compromised|planned",
+      "about": "kind 30103 with an unrecognised reason value",
+      "event": {
+        "id": "72d5da74df3bbdcb8352fbc3817179a9cb9b26ab6a1b3952fcfb05b2d2de5c9f",
+        "pubkey": "c8be2fa2322768d89d5ac1de119d11ec55270759202ca4aa97a4c16fdda3c6b1",
+        "created_at": 1700000000,
+        "kind": 30103,
+        "tags": [
+          [
+            "d",
+            "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494"
+          ],
+          [
+            "p",
+            "100f6d8cbf94afb6fc58e9c384b9b3a6516091373a83c869f4e24a9d2bb4a494"
+          ],
+          [
+            "reason",
+            "bored"
+          ]
+        ],
+        "content": "",
+        "sig": "3c2950c49af214e88b13d917416b8dd6558bdbf6a4c24e86a2a106a95f8990aaa84473afa046b92e3a77e18942d96c1368b4b58f8c0f70190d61d57e3ebfbfc3"
+      }
+    }
+  ]
+}
