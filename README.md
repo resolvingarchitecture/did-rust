@@ -1,7 +1,7 @@
 # did-rust
 
 A small, dependency-light implementation of [Resolving
-Architecture](https://resolvingarchitecture.dev)'s DID design, ported from the
+Architecture](https://resolvingarchitecture.io)'s DID design, ported from the
 [`did-ts`](https://github.com/resolvingarchitecture/did-ts) reference:
 
 - one **secp256k1 / BIP-340** keypair as an identity, with `hex` / `npub` /
