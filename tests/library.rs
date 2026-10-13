@@ -245,3 +245,15 @@ fn did_nostr_document_and_multikey_round_trip() {
     assert_eq!(doc.authentication[0], format!("did:nostr:{}#0", id.pubkey));
     assert_eq!(doc.service.as_ref().unwrap().len(), 1);
 }
+
+#[test]
+fn identity_from_secret_accepts_hex_and_nsec() {
+    let id = generate_identity();
+    let nsec = secret_to_nsec(&id.secret_hex).unwrap();
+    for input in [id.secret_hex.clone(), nsec.clone(), nsec.to_uppercase()] {
+        let imp = identity_from_secret(&input).unwrap();
+        assert_eq!(imp.pubkey, id.pubkey);
+        assert_eq!(hex_to_npub(&imp.pubkey).unwrap(), hex_to_npub(&id.pubkey).unwrap());
+    }
+    assert!(identity_from_secret(&hex_to_npub(&id.pubkey).unwrap()).is_err());
+}

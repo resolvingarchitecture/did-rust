@@ -72,6 +72,17 @@ pub fn public_key_from_secret(secret_hex: &str) -> Result<String> {
     Ok(identity_from_secret_key(&sk).pubkey)
 }
 
+/// Import an identity from a secret given as 64-char hex or `nsec1…`; the
+/// public key (and so the npub) is derived from it.
+pub fn identity_from_secret(secret: &str) -> Result<Identity> {
+    let s = secret.trim().to_lowercase();
+    let hex = if s.starts_with("nsec1") { nsec_to_secret(&s)? } else { s };
+    let bytes = decode_hex32(&hex, "secret key")?;
+    let sk =
+        SecretKey::from_slice(&bytes).map_err(|e| Error::Crypto(format!("secret key: {e}")))?;
+    Ok(identity_from_secret_key(&sk))
+}
+
 // --- encodings -----------------------------------------------------------
 
 fn bech32_encode(hrp: &str, data: &[u8]) -> String {

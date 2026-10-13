@@ -20,7 +20,7 @@ pub use error::{Error, Result};
 pub use serialize::{compute_id, preimage_bytes, serialize_event, serialize_string, EventTemplate};
 
 pub use keys::{
-    did_to_hex, generate_identity, hex_to_did, hex_to_npub, is_valid_pubkey, normalize_pubkey,
+    did_to_hex, generate_identity, hex_to_did, identity_from_secret, hex_to_npub, is_valid_pubkey, normalize_pubkey,
     npub_to_hex, nsec_to_secret, public_key_from_secret, secret_to_nsec, Identity,
 };
 
